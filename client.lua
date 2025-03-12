@@ -1,3 +1,20 @@
+function GetWeaponClass(weaponHash)
+    local groupHash = GetWeapontypeGroup(weaponHash)
+    return WeaponGroupClasses[groupHash] or "Unknown"
+end
+
+local WeaponGroupClasses = {
+    [416676503]  = "Pistol",   -- GROUP_PISTOL
+    [860033945]  = "Shotgun",  -- GROUP_SHOTGUN
+    [970310034]  = "SMG",      -- GROUP_SMG
+    [1159398588] = "Rifle",    -- GROUP_RIFLE
+    [3082541095] = "Sniper",   -- GROUP_SNIPER
+    [2725924767] = "Heavy",    -- GROUP_HEAVY
+    [-1212426201] = "Throwable", -- GROUP_THROWN
+    [-1569042529] = "Melee",     -- GROUP_MELEE
+    -- Add more if needed...
+}
+
 -- Gunshot detection
 Citizen.CreateThread(function()
     while true do
@@ -7,7 +24,9 @@ Citizen.CreateThread(function()
         local ped = PlayerPedId()
         local myPos = GetEntityCoords(ped)
         local weapon = GetSelectedPedWeapon(ped)
+        local weaponClass = GetWeaponClass(weapon)
         local isSilenced = IsPedCurrentWeaponSilenced(ped)
+        
 
         -- Get in-game time
         local hours, minutes, seconds = GetClockHours(), GetClockMinutes(), GetClockSeconds()
@@ -33,6 +52,7 @@ Citizen.CreateThread(function()
                 fields = {
                     { icon = 'map-marker', label = 'Location', value = streetName },
                     { icon = "fa-solid fa-venus-mars", label = "Gender", value = gender },
+                    { icon = "fa-solid fa-gun", label = "Weapon", value = weaponClass },
                     { icon = 'clock', label = 'Time', value = gameTime }
                 }
             })
@@ -47,6 +67,7 @@ Citizen.CreateThread(function()
                 fields = {
                     { icon = 'map-marker', label = 'Location', value = streetName },
                     { icon = "fa-solid fa-venus-mars", label = "Gender", value = gender },
+                    { icon = "fa-solid fa-gun", label = "Weapon", value = weaponClass },
                     { icon = 'clock', label = 'Time', value = gameTime }
                 }
             })
@@ -56,6 +77,7 @@ Citizen.CreateThread(function()
         end
     end
 end)
+
 
 
 -- Weapon blacklist function
