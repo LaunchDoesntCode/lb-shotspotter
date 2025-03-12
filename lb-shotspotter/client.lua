@@ -1,19 +1,19 @@
+local WeaponGroupClasses = {
+    [416676503]   = "Pistol",     -- GROUP_PISTOL
+    [860033945]   = "Shotgun",    -- GROUP_SHOTGUN
+    [970310034]   = "SMG",        -- GROUP_SMG
+    [1159398588]  = "Rifle",      -- GROUP_RIFLE
+    [3082541095]  = "Sniper",     -- GROUP_SNIPER
+    [2725924767]  = "Heavy",      -- GROUP_HEAVY
+    [-1212426201] = "Throwable",  -- GROUP_THROWN
+    [-1569042529] = "Melee"       -- GROUP_MELEE
+}
+
+-- The function must be below the table declaration so it can see `WeaponGroupClasses`.
 function GetWeaponClass(weaponHash)
     local groupHash = GetWeapontypeGroup(weaponHash)
     return WeaponGroupClasses[groupHash] or "Unknown"
 end
-
-local WeaponGroupClasses = {
-    [416676503]  = "Pistol",   -- GROUP_PISTOL
-    [860033945]  = "Shotgun",  -- GROUP_SHOTGUN
-    [970310034]  = "SMG",      -- GROUP_SMG
-    [1159398588] = "Rifle",    -- GROUP_RIFLE
-    [3082541095] = "Sniper",   -- GROUP_SNIPER
-    [2725924767] = "Heavy",    -- GROUP_HEAVY
-    [-1212426201] = "Throwable", -- GROUP_THROWN
-    [-1569042529] = "Melee",     -- GROUP_MELEE
-    -- Add more if needed...
-}
 
 -- Gunshot detection
 Citizen.CreateThread(function()
@@ -24,7 +24,8 @@ Citizen.CreateThread(function()
         local ped = PlayerPedId()
         local myPos = GetEntityCoords(ped)
         local weapon = GetSelectedPedWeapon(ped)
-        local weaponClass = GetWeaponClass(weapon)
+		local weaponHash = (type(weapon) == "string") and GetHashKey(weapon) or weapon
+        local weaponClass = GetWeaponClass(weaponHash) or "Unknown"
         local isSilenced = IsPedCurrentWeaponSilenced(ped)
         
 
@@ -50,10 +51,9 @@ Citizen.CreateThread(function()
                 time = 500,
                 job = 'police',
                 fields = {
-                    { icon = 'map-marker', label = 'Location', value = streetName },
                     { icon = "fa-solid fa-venus-mars", label = "Gender", value = gender },
                     { icon = "fa-solid fa-gun", label = "Weapon", value = weaponClass },
-                    { icon = 'clock', label = 'Time', value = gameTime }
+                    { icon = 'fa-solid fa-clock', label = 'Time', value = gameTime }
                 }
             })
             local dispatchId = exports["lb-tablet"]:AddDispatch({
@@ -65,10 +65,9 @@ Citizen.CreateThread(function()
                 time = 500,
                 job = 'ambulance',
                 fields = {
-                    { icon = 'map-marker', label = 'Location', value = streetName },
                     { icon = "fa-solid fa-venus-mars", label = "Gender", value = gender },
                     { icon = "fa-solid fa-gun", label = "Weapon", value = weaponClass },
-                    { icon = 'clock', label = 'Time', value = gameTime }
+                    { icon = 'fa-solid fa-clock', label = 'Time', value = gameTime }z
                 }
             })
 
