@@ -67,7 +67,7 @@ Citizen.CreateThread(function()
                 fields = {
                     { icon = "fa-solid fa-venus-mars", label = "Gender", value = gender },
                     { icon = "fa-solid fa-gun", label = "Weapon", value = weaponClass },
-                    { icon = 'fa-solid fa-clock', label = 'Time', value = gameTime }z
+                    { icon = 'fa-solid fa-clock', label = 'Time', value = gameTime }
                 }
             })
 
