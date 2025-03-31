@@ -8,7 +8,7 @@ RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y,
     local gender = (Player.PlayerData.gender == 0) and "Male" or "Female"
     local jobName = Player.PlayerData.job.name
 
-    if jobName == "police" then return end  -- Ignore cops
+    if Config.blacklistedJobs[jobName] then return end
 
     local locationLabel = street1
     if (street2 ~= nil and street2 ~= "") then
