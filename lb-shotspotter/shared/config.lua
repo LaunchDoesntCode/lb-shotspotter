@@ -1,12 +1,17 @@
 Config = {}
 
--- Scan interval (ms)
+-- Scan interval (ms) -- Increasing this number make the gunshot detection less accurate but decrease server load
 Config.scanInterval = 25
 
 -- Time (ms) before allowing another shot to trigger dispatch
 Config.shotspotter_cooldown = 60000
-Config.dispatch_delay = 2500  -- 15 seconds before sending dispatch
+Config.dispatch_delay = 15000  -- 15 seconds before sending dispatch, set to 0 for no delay
 Config.ambulancedispatch = true -- whether or not to send ambulance got shot dispatches
+
+Config.blacklistedJobs = {
+    "police",
+    "bcso"
+}
 
 -- Blacklisted weapons that DO NOT trigger ShotSpotter
 Config.blacklistedweapons = {
