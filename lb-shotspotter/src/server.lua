@@ -8,7 +8,7 @@ CreateThread(function()
         useESX = true
         print("[ShotSpotter] Using ESX Framework")
     elseif GetResourceState('qbx_core') == 'started' then
-        Framework = exports['qbx_core']:GetCoreObject()
+        Framework = exports['qb-core']:GetCoreObject()
         useQbox = true
         print("[ShotSpotter] Using Qbox Framework")
     elseif GetResourceState('qb-core') == 'started' then
@@ -31,17 +31,11 @@ RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y,
     	jobName = Player.getJob().name
     	gender = (Player.get("sex") == "f") and "Female" or "Male"
 
-    elseif useQbox then
-    	Player = Framework.Player(src)
-    	if not Player then return end
-    	jobName = Player.PlayerData.job.name
-    	gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
-
-    else -- QBCore
+    else -- QBCore & QBX
     	Player = Framework.Functions.GetPlayer(src)
     	if not Player then return end
     	jobName = Player.PlayerData.job.name
-   	 gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
+   	gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
      end
 
 
