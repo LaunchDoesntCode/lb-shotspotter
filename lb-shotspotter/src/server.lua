@@ -7,13 +7,13 @@ CreateThread(function()
         Framework = exports['es_extended']:getSharedObject()
         useESX = true
         print("[ShotSpotter] Using ESX Framework")
-    elseif GetResourceState('qb-core') == 'started' then
-        Framework = exports['qb-core']:GetCoreObject()
-        print("[ShotSpotter] Using QBCore Framework")
     elseif GetResourceState('qbx_core') == 'started' then
         Framework = exports['qbx_core']:GetCoreObject()
         useQbox = true
         print("[ShotSpotter] Using Qbox Framework")
+    elseif GetResourceState('qb-core') == 'started' then
+        Framework = exports['qb-core']:GetCoreObject()
+        print("[ShotSpotter] Using QBCore Framework")
     else
         print("[ShotSpotter] No supported framework found!")
     end
