@@ -1,12 +1,19 @@
 Config = {}
 
--- Scan interval (ms) -- Increasing this number makes the gunshot detection less accurate but decreases server load
+-- Scan interval (ms)
+-- Important to adjust this interval to your liking; this is the interval in which it checks if the player is actively firing a weapon. 
+-- Increasing this interval will result in decreased detection accuracy. If someone shoots once, the flag is active for only a few frames. 
+-- This interval needs to be low enough to check virtually every frame; however, if you set it too low, you will run into performance issues.
+-- 25ms interval will check if the player is actively shooting 40 times a second. 
 Config.scanInterval = 25
 
 -- Time (ms) before allowing another shot to trigger dispatch
 Config.shotspotter_cooldown = 60000
 Config.dispatch_delay = 15000  -- 15 seconds before sending dispatch, set to 0 for no delay
 Config.ambulancedispatch = true -- whether or not to send ambulance got shot dispatches
+Config.ambulancejob = 'ambulance' -- job to receive EMS dispatch alerts
+Config.policejob = 'police' -- police job to receive dispatch alerts
+Config.vehiclealerts = true -- Enables/disables "shots fired from vehicle" alerts
 
 
 -- Blacklisted jobs, players with these jobs will not trigger gunshot dispatches
