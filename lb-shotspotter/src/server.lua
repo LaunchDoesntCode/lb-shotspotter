@@ -32,13 +32,13 @@ RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y,
             }
         }
 	if Config.vehiclealerts and isInVehicle then
-	    --table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'License Plate', value = vehiclePlate })
-	    table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'Type', value = vehicleType })
-	    table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'Color', value = vehicleColor })
+		--table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'License Plate', value = vehiclePlate })
+		table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'Type', value = vehicleType })
+		table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'Color', value = vehicleColor })
 	end
 
-        exports["lb-tablet"]:AddDispatch(policeDispatch)
-	if Config.ambulancedispatch
+	exports["lb-tablet"]:AddDispatch(policeDispatch)
+	if Config.ambulancedispatch then
 		policeDispatch.job = Config.ambulancejob
 		exports["lb-tablet"]:AddDispatch(policeDispatch)
 	end
