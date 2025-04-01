@@ -1,12 +1,39 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local Framework = nil
+local useESX = false
+
+-- Auto-detect framework
+CreateThread(function()
+    if GetResourceState('es_extended') == 'started' then
+        Framework = exports['es_extended']:getSharedObject()
+        useESX = true
+        print("[ShotSpotter] Using ESX Framework")
+    elseif GetResourceState('qb-core') == 'started' then
+        Framework = exports['qb-core']:GetCoreObject()
+        print("[ShotSpotter] Using QBCore Framework")
+    else
+        print("[ShotSpotter] No supported framework found!")
+    end
+end)
+
 
 RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y, z, weaponClass, isInVehicle, vehiclePlate, vehicleType, vehicleColor, vehicleClass)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if not Player then return end
+    local Player = nil
+    local jobName = "unknown"
+    local gender = "Unknown"
 
-    local gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
-    local jobName = Player.PlayerData.job.name
+
+    if useESX then
+    	Player = Framework.GetPlayerFromId(src)
+    	if not Player then return end
+    	jobName = Player.getJob().name
+    	gender = (Player.get("sex") == "f") and "Female" or "Male"
+    else
+    	Player = Framework.Functions.GetPlayer(src)
+    	if not Player then return end
+    	jobName = Player.PlayerData.job.name
+    	gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
+    end
 
     if Config.blacklistedJobs[jobName] then return end
 
