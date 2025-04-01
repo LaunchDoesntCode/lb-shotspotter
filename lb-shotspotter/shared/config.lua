@@ -8,6 +8,8 @@ Config.shotspotter_cooldown = 60000
 Config.dispatch_delay = 15000  -- 15 seconds before sending dispatch, set to 0 for no delay
 Config.ambulancedispatch = true -- whether or not to send ambulance got shot dispatches
 
+
+-- Blacklisted jobs, players with these jobs will not trigger gunshot dispatches
 Config.blacklistedJobs = {
     police = true,
     bcso   = true
