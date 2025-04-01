@@ -10,4 +10,6 @@ Changes:
   + Added job-whitelist, so police don't trigger dispatch calls
 
 
-![shots](https://github.com/user-attachments/assets/0db18628-5eab-47db-9eac-c39eb9e814db) ![shots-vehicle](https://github.com/user-attachments/assets/27a3d8ef-c1c9-4389-82f1-de511b7bcb64)
+
+![image](https://github.com/user-attachments/assets/641c98ba-fcee-4948-a867-462a030ced6c)
+![image2](https://github.com/user-attachments/assets/f0333b1d-cd81-4f48-b0bb-754ce5e6ec43)
