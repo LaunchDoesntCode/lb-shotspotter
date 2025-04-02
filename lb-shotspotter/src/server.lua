@@ -26,18 +26,16 @@ RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y,
     local Player, jobName, gender
 
     if useESX then
-   	Player = Framework.GetPlayerFromId(src)
-    	if not Player then return end
-    	jobName = Player.getJob().name
-    	gender = (Player.get("sex") == "f") and "Female" or "Male"
-
-    else -- QBCore & QBX
-    	Player = Framework.Functions.GetPlayer(src)
-    	if not Player then return end
-    	jobName = Player.PlayerData.job.name
-   	gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
-     end
-
+        Player = Framework.GetPlayerFromId(src)
+        if not Player then return end
+        jobName = Player.getJob().name
+        gender = (Player.get("sex") == "f") and "Female" or "Male"
+    else
+        Player = Framework.Functions.GetPlayer(src)
+        if not Player then return end
+        jobName = Player.PlayerData.job.name
+        gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
+    end
 
     if Config.blacklistedJobs[jobName] then return end
 
@@ -48,30 +46,29 @@ RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y,
 
     Citizen.CreateThread(function()
         Citizen.Wait(Config.dispatch_delay)
-
-        local policeDispatch = {
+        local titleText = (Config.vehiclealerts and isInVehicle) and 'Shots fired from a vehicle' or 'Shots fired'
+        local descText = ('Gunfire reported near %s'):format(locationLabel)
+        local dispatchData = {
             priority    = 'high',
             code        = '10-04',
-            title = (Config.vehiclealerts and isInVehicle) and 'Shots fired from a vehicle' or 'Shots fired',
-            description = ('Gunfire reported near %s'):format(locationLabel),
+            title       = titleText,
+            description = descText,
             location    = { label = locationLabel, coords = { x = x, y = y, z = z } },
             time        = 300,
-            job         = Config.policejob,
             fields      = {
                 { icon = 'fa-solid fa-gun', label = 'Weapon Class', value = weaponClass },
                 { icon = 'fa-solid fa-venus-mars', label = 'Gender', value = gender }
             }
         }
-	if Config.vehiclealerts and isInVehicle then
-		--table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'License Plate', value = vehiclePlate })
-		table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'Type', value = vehicleType })
-		table.insert(policeDispatch.fields, { icon = 'fa-solid fa-car', label = 'Color', value = vehicleColor })
-	end
-
-	exports["lb-tablet"]:AddDispatch(policeDispatch)
-	if Config.ambulancedispatch then
-		policeDispatch.job = Config.ambulancejob
-		exports["lb-tablet"]:AddDispatch(policeDispatch)
-	end
+        if Config.vehiclealerts and isInVehicle then
+            --table.insert(dispatchData.fields, { icon = 'fa-solid fa-car', label = 'Plate', value = vehiclePlate })
+            table.insert(dispatchData.fields, { icon = 'fa-solid fa-car', label = 'Type', value = vehicleType })
+            table.insert(dispatchData.fields, { icon = 'fa-solid fa-car', label = 'Color', value = vehicleColor })
+        end
+        for _, job in ipairs(Config.dispatchJobs) do
+            local copy = dispatchData
+            copy.job = job
+            exports["lb-tablet"]:AddDispatch(copy)
+        end
     end)
 end)

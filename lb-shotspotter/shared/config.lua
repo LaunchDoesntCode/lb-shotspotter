@@ -7,13 +7,18 @@ Config = {}
 -- 25ms interval will check if the player is actively shooting 40 times a second. 
 Config.scanInterval = 25
 
--- Time (ms) before allowing another shot to trigger dispatch
-Config.shotspotter_cooldown = 60000
+Config.shotspotter_cooldown = 60000 -- Time (ms) before allowing another shot to trigger dispatch
 Config.dispatch_delay = 15000  -- 15 seconds before sending dispatch, set to 0 for no delay
-Config.ambulancedispatch = true -- whether or not to send ambulance got shot dispatches
-Config.ambulancejob = 'ambulance' -- job to receive EMS dispatch alerts
-Config.policejob = 'police' -- police job to receive dispatch alerts
-Config.vehiclealerts = true -- Enables/disables "shots fired from vehicle" alerts
+Config.vehiclealerts = true -- Enables/disables "shots fired from vehicle" alerts. If disabled regular dispatches will still be sent.
+
+Config.pedWitness = {
+    enabled = true, -- Enables/disables witnesses.
+    radius = 200, -- Radius of nearby ped witnesses
+    callChance = 100, -- percent chance a ped calls
+}
+
+-- Jobs that will receive the dispatch alerts.
+Config.dispatchJobs = {"police", "ambulance"}
 
 
 -- Blacklisted jobs, players with these jobs will not trigger gunshot dispatches
