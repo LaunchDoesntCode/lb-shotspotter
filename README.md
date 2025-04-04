@@ -3,12 +3,19 @@ LB-Tablet dispatch for gun shot detection. Credit to OrbitalWatch & Lama for the
 Dependancies:
   - QB-Core/QBox or ESX Framework
 
-Changes:
-  + Added shots fired from vehicle dispatch
-  + Added new fields for caller information (gender, weapon type, vehicle color, vehicle type)
-  + Added ped witnesses; peds within a certain radius of gunfire have a chance to trigger dispatch alerts
-  + Changed config to open up more options
-  + Added job-whitelist, so police don't trigger dispatch calls
+Features:
+  + Shots fired from vehicle dispatch
+  + Detailed dispatch fields for suspect information (gender, weapon type, vehicle color, vehicle type)
+  + Ped witnesses; peds within a certain radius of gunfire have a chance to trigger dispatch alerts
+  + Robust config, allowing for customizabilit for most featured
+  + Job-whitelist, so police don't trigger dispatch calls
+
+Installation:
+  1. Download code as zip from this repository
+  2. Add lb-shotspotter into resources folder
+  3. Add "start lb-shotspotter" after your framework and LB-Tablet in your server config file
+  4. Configure shared/config.lua to your liking
+  5. That's it :)
 
 
 
