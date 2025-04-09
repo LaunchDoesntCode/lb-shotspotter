@@ -19,7 +19,7 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent("lb-shotspot:fightdispatch", function(street1, street2, x, y, z)
+RegisterNetEvent("lb-shotspot:dispatch", function(data)
     local src = source
     local Player, jobName, gender
 
@@ -37,82 +37,60 @@ RegisterNetEvent("lb-shotspot:fightdispatch", function(street1, street2, x, y, z
 
     if Config.blacklistedJobs[jobName] then return end
 
-    local locationLabel = street1
-    if (street2 ~= nil and street2 ~= "") then
-        locationLabel = locationLabel .. " / " .. street2
+    local loc = data.street1
+    if data.street2 and data.street2 ~= "" then
+        loc = loc .. " / " .. data.street2
     end
 
-    Citizen.CreateThread(function()
-        Citizen.Wait(Config.dispatch_delay)
-        local dispatchData = {
-            priority    = 'medium',
-            code        = '10-10',
-            title       = 'Fighting Reported',
-            description = ('Physical altercation reported near %s'):format(locationLabel),
-            location    = { label = locationLabel, coords = { x = x, y = y, z = z } },
-            time        = 300,
-            fields      = {
-                { icon = 'fa-solid fa-fist-raised', label = 'Type', value = "Fist Fight" },
-                { icon = 'fa-solid fa-venus-mars', label = 'Gender', value = gender }
-            }
-        }
+    local dispatch = {
+        location = { label = loc, coords = data.coords },
+        time     = 300,
+        fields   = {
+            { icon = 'fa-solid fa-venus-mars', label = 'Gender', value = gender }
+        },
+        job      = nil
+    }
 
-        for _, job in ipairs(Config.dispatchJobs) do
-            local copy = dispatchData
-            copy.job = job
-            exports["lb-tablet"]:AddDispatch(copy)
+    -- Customize based on type
+    if data.type == "gunshot" then
+        dispatch.priority = "high"
+        dispatch.code = "10-04"
+        dispatch.title = (Config.vehiclealerts and data.isInVehicle) and "Shots fired from a vehicle" or "Shots fired"
+        dispatch.description = ("Gunfire reported near %s"):format(loc)
+        table.insert(dispatch.fields, { icon = 'fa-solid fa-gun', label = 'Weapon Class', value = data.weaponClass })
+        if Config.vehiclealerts and data.isInVehicle then
+            table.insert(dispatch.fields, { icon = 'fa-solid fa-car', label = 'Type', value = data.vehType })
+            table.insert(dispatch.fields, { icon = 'fa-solid fa-car', label = 'Color', value = data.vehColor })
         end
-    end)
+
+    elseif data.type == "fight" then
+        dispatch.priority = "medium"
+        dispatch.code = "10-10"
+        dispatch.title = "Fighting Reported"
+        dispatch.description = ("Physical altercation reported near %s"):format(loc)
+        table.insert(dispatch.fields, { icon = 'fa-solid fa-fist-raised', label = 'Type', value = "Fist Fight" })
+    end
+
+    -- Send to all configured jobs
+    for _, job in ipairs(Config.dispatchJobs) do
+        local copy = table.deepcopy(dispatch)
+        copy.job = job
+        exports["lb-tablet"]:AddDispatch(copy)
+    end
 end)
 
-RegisterNetEvent("lb-shotspot:gunshotdispatch", function(street1, street2, x, y, z, weaponClass, isInVehicle, vehiclePlate, vehicleType, vehicleColor, vehicleClass)
-    local src = source
-    local Player, jobName, gender
-
-    if useESX then
-        Player = Framework.GetPlayerFromId(src)
-        if not Player then return end
-        jobName = Player.getJob().name
-        gender = (Player.get("sex") == "f") and "Female" or "Male"
-    else
-        Player = Framework.Functions.GetPlayer(src)
-        if not Player then return end
-        jobName = Player.PlayerData.job.name
-        gender = (Player.PlayerData.gender == 0) and "Female" or "Male"
-    end
-
-    if Config.blacklistedJobs[jobName] then return end
-
-    local locationLabel = street1
-    if (street2 ~= nil and street2 ~= "") then
-        locationLabel = locationLabel .. " / " .. street2
-    end
-
-    Citizen.CreateThread(function()
-        Citizen.Wait(Config.dispatch_delay)
-        local titleText = (Config.vehiclealerts and isInVehicle) and 'Shots fired from a vehicle' or 'Shots fired'
-        local descText = ('Gunfire reported near %s'):format(locationLabel)
-        local dispatchData = {
-            priority    = 'high',
-            code        = '10-04',
-            title       = titleText,
-            description = descText,
-            location    = { label = locationLabel, coords = { x = x, y = y, z = z } },
-            time        = 300,
-            fields      = {
-                { icon = 'fa-solid fa-gun', label = 'Weapon Class', value = weaponClass },
-                { icon = 'fa-solid fa-venus-mars', label = 'Gender', value = gender }
-            }
-        }
-        if Config.vehiclealerts and isInVehicle then
-            --table.insert(dispatchData.fields, { icon = 'fa-solid fa-car', label = 'Plate', value = vehiclePlate })
-            table.insert(dispatchData.fields, { icon = 'fa-solid fa-car', label = 'Type', value = vehicleType })
-            table.insert(dispatchData.fields, { icon = 'fa-solid fa-car', label = 'Color', value = vehicleColor })
+-- utility
+function table.deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[table.deepcopy(orig_key)] = table.deepcopy(orig_value)
         end
-        for _, job in ipairs(Config.dispatchJobs) do
-            local copy = dispatchData
-            copy.job = job
-            exports["lb-tablet"]:AddDispatch(copy)
-        end
-    end)
-end)
+        setmetatable(copy, table.deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
