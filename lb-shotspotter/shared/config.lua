@@ -8,11 +8,11 @@ Config = {}
 Config.scanInterval = 25
 
 Config.shotspotter_cooldown = 60000 -- Time (ms) before allowing another shot to trigger dispatch
-Config.dispatch_delay = 15000  -- 15 seconds before sending dispatch, set to 0 for no delay
+Config.dispatch_delay = 0  -- 15 seconds before sending dispatch, set to 0 for no delay
 Config.vehiclealerts = true -- Enables/disables "shots fired from vehicle" alerts. If disabled regular dispatches will still be sent.
 
 Config.pedWitness = {
-    enabled = true, -- Enables/disables witnesses.
+    enabled = false, -- Enables/disables witnesses.
     radius = 200, -- Radius of nearby ped witnesses
     callChance = 100, -- percent chance a ped calls
 }
