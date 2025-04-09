@@ -192,7 +192,7 @@ Citizen.CreateThread(function()
 
         -- Fighting Detection
         if IsPedInMeleeCombat(ped) and shouldTriggerDispatch("fight", Config.fight_cooldown) then
-            if shouldPedWitness(coords) then
+            if shouldPedWitness(coords) and Config.fightalerts then
                 sendDispatchEvent("lb-shotspot:dispatch", {
                     type = "fight",
                     street1 = street1,
