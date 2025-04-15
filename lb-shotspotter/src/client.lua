@@ -1,4 +1,7 @@
-local lastShotTime = 0
+local lastDispatchTimes = {
+    gunshot = 0,
+    fight = 0,
+}
 
 local vehicleColors = {
     [0] = "Black", [1] = "Graphite", [2] = "Black Steel", [3] = "Dark Silver", [4] = "Silver",
@@ -117,56 +120,88 @@ local function findNearbyPeds(coords, radius)
     return peds
 end
 
+local function shouldTriggerDispatch(type, cooldown)
+    local now = GetGameTimer()
+    if (now - lastDispatchTimes[type]) > cooldown then
+        lastDispatchTimes[type] = now
+        return true
+    end
+    return false
+end
+
+local function shouldPedWitness(coords)
+    if not Config.pedWitness.enabled then return true end
+    local nearPeds = findNearbyPeds(coords, Config.pedWitness.radius)
+    if #nearPeds == 0 then return false end
+    local roll = math.random(1, 100)
+    return roll <= Config.pedWitness.callChance
+end
+
+local function sendDispatchEvent(eventName, data)
+    TriggerServerEvent(eventName, data)
+end
+
+-- Unified thread
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(Config.scanInterval)
+
         local ped = PlayerPedId()
-        if DoesEntityExist(ped) and IsPedShooting(ped) then
-            local now = GetGameTimer()
-            if (now - lastShotTime) > Config.shotspotter_cooldown then
-                lastShotTime = now
-                local currentWepHash = GetSelectedPedWeapon(ped)
-                local blacklistedweapon = false
-                for _, weaponName in ipairs(Config.blacklistedweapons) do
-                    if currentWepHash == GetHashKey(weaponName) then
-                        blacklistedweapon = true
-                        break
-                    end
-                end
-                if not blacklistedweapon then
-                    local isSilenced = IsPedCurrentWeaponSilenced(ped)
-                    if not isSilenced then
-                        local coords = GetEntityCoords(ped)
-                        if Config.pedWitness.enabled then
-                            local nearPeds = findNearbyPeds(coords, Config.pedWitness.radius)
-                            if #nearPeds == 0 then
-                                goto continue
-                            end
-                            local roll = math.random(1, 100)
-                            if roll > Config.pedWitness.callChance then
-                                goto continue
-                            end
-                        end
-                        local x, y, z = coords.x, coords.y, coords.z
-                        local hash1, hash2 = GetStreetNameAtCoord(x, y, z)
-                        local street1 = GetStreetNameFromHashKey(hash1)
-                        local street2 = GetStreetNameFromHashKey(hash2)
-                        local weaponClass = getWeaponClass(currentWepHash)
-                        local veh = GetVehiclePedIsIn(ped, false)
-                        local isInVehicle = (veh and veh ~= 0)
-                        local plate, vehType, vehColor, vehClass = "Unknown", "Unknown", "Unknown", "Unknown"
-                        if isInVehicle then
-                            plate, vehType, vehColor, vehClass = getVehicleInfo(veh)
-                        end
-                        TriggerServerEvent(
-                            "lb-shotspot:gunshotdispatch",
-                            street1, street2, x, y, z, weaponClass, isInVehicle,
-                            plate, vehType, vehColor, vehClass
-                        )
-                    end
+        if not DoesEntityExist(ped) then goto continue end
+
+        local coords = GetEntityCoords(ped)
+        local x, y, z = coords.x, coords.y, coords.z
+        local hash1, hash2 = GetStreetNameAtCoord(x, y, z)
+        local street1 = GetStreetNameFromHashKey(hash1)
+        local street2 = GetStreetNameFromHashKey(hash2)
+
+        -- Gunshot Detection
+        if IsPedShooting(ped) and shouldTriggerDispatch("gunshot", Config.shotspotter_cooldown) then
+            local weapon = GetSelectedPedWeapon(ped)
+            local isSilenced = IsPedCurrentWeaponSilenced(ped)
+            local blacklisted = false
+
+            for _, name in ipairs(Config.blacklistedweapons) do
+                if weapon == GetHashKey(name) then
+                    blacklisted = true
+                    break
                 end
             end
+
+            if not blacklisted and not isSilenced and shouldPedWitness(coords) then
+                local veh = GetVehiclePedIsIn(ped, false)
+                local isInVehicle = (veh and veh ~= 0)
+                local plate, vehType, vehColor, vehClass = "Unknown", "Unknown", "Unknown", "Unknown"
+                if isInVehicle then
+                    plate, vehType, vehColor, vehClass = getVehicleInfo(veh)
+                end
+
+                sendDispatchEvent("lb-shotspot:dispatch", {
+                    type = "gunshot",
+                    street1 = street1,
+                    street2 = street2,
+                    coords = { x = x, y = y, z = z },
+                    weaponClass = getWeaponClass(weapon),
+                    isInVehicle = isInVehicle,
+                    plate = plate,
+                    vehType = vehType,
+                    vehColor = vehColor
+                })
+            end
         end
+
+        -- Fighting Detection
+        if IsPedInMeleeCombat(ped) and shouldTriggerDispatch("fight", Config.fight_cooldown) then
+            if shouldPedWitness(coords) and Config.fightalerts then
+                sendDispatchEvent("lb-shotspot:dispatch", {
+                    type = "fight",
+                    street1 = street1,
+                    street2 = street2,
+                    coords = { x = x, y = y, z = z }
+                })
+            end
+        end
+
         ::continue::
     end
 end)
